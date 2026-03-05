@@ -14,6 +14,7 @@ download_folder = 'downloads'
 def index():
     return render_template("index.html", yt=None)
 
+#Cria uma rota para retornar as informações de thumb, titulo e autor assim que a pessoa coloca o input
 @app.route('/get_info', methods=["GET", "POST"])
 def get_info():
     url = request.args.get('url_video')
@@ -24,6 +25,7 @@ def get_info():
         'author': yt.author
     })
 
+#Cria uma rota que utiliza a função de baixar os videos
 @app.route("/download", methods=['GET', 'POST'])
 def download():
     pasta_destino = "C:/videos"
