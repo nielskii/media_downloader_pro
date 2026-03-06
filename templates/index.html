@@ -3,222 +3,231 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TubeSave Pro - Downloader</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Media Downloader Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
         :root {
-            --primary: #ff0050;
-            --secondary: #00f2ea;
-            --bg: #0f0c29;
-            --card-bg: rgba(255, 255, 255, 0.05);
-            --success: #2ecc71;
+            --bg: #05070a;
+            --card: #10141d;
+            --primary: #00f2ea;
+            --yt: #ff0000;
+            --insta: #e1306c;
+            --text: #ffffff;
+            --text-dim: #a0a0a0;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
 
         body {
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at 50% -20%, #1a2332 0%, var(--bg) 80%);
             min-height: 100vh;
-            color: white;
+            color: var(--text);
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
+            padding: 40px 20px;
         }
 
-        .container {
-            max-width: 600px;
-            width: 100%;
-            animation: fadeIn 0.8s ease-out;
-            flex: 1;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .container { max-width: 550px; width: 100%; flex: 1; }
 
         header { text-align: center; margin-bottom: 40px; }
+        header h1 { font-weight: 600; font-size: 2.2rem; letter-spacing: -1px; }
+        header h1 span { color: var(--primary); }
+        header p { color: var(--text-dim); font-size: 0.9rem; }
 
-        h1 {
-            font-size: 3rem;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 10px rgba(255, 0, 80, 0.3));
+        .tabs {
+            display: flex;
+            background: var(--card);
+            padding: 5px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .search-box {
-            position: relative;
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: 0.3s;
+            color: var(--text-dim);
+            font-weight: 600;
+            font-size: 0.85rem;
             display: flex;
-            background: var(--card-bg);
-            padding: 8px;
-            border-radius: 50px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .tab.active { background: rgba(255,255,255,0.05); color: var(--text); }
+        .tab.active i.fa-youtube { color: var(--yt); }
+        .tab.active i.fa-instagram { color: var(--insta); }
+
+        .search-box {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 5px;
+            display: flex;
+            border: 1px solid rgba(255,255,255,0.1);
             margin-bottom: 30px;
         }
 
         input[type="text"] {
             flex: 1;
-            background-color: transparent;
+            background: transparent;
             border: none;
-            padding: 15px 25px;
+            padding: 15px 20px;
             color: white;
-            border-radius: 50px;
-            font-size: 1rem;
             outline: none;
         }
 
         .video-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(15px);
-            border-radius: 24px;
+            background: var(--card);
+            border-radius: 20px;
             padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: 0.4s;
+            border: 1px solid rgba(255,255,255,0.05);
             display: none;
+            animation: slideUp 0.5s ease;
         }
 
-        .thumb-container {
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .thumb-preview {
             width: 100%;
-            position: relative;
-            border-radius: 15px;
-            overflow: hidden;
+            border-radius: 12px;
             margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .thumb-container img { width: 100%; display: block; transition: 0.5s; }
+        .info h4 { font-size: 1rem; margin-bottom: 5px; line-height: 1.4; }
+        
+        .options-group { display: none; margin-top: 20px; }
+        .options-group.active { display: block; }
 
-        .info h3 { font-size: 1.2rem; margin-bottom: 5px; color: #eee; }
-        .info p { color: var(--secondary); font-weight: bold; margin-bottom: 20px; font-size: 0.9rem; }
-
-        .download-option {
+        .download-item {
+            background: rgba(255,255,255,0.03);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(255,255,255,0.03);
-            margin-bottom: 10px;
-            padding: 12px 20px;
-            border-radius: 12px;
-            transition: 0.3s;
-        }
-
-        .format-info { display: flex; flex-direction: column; }
-        .format-info span { font-size: 0.8rem; color: #888; }
-
-        .download-btn {
-            background: var(--success);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-        }
-
-        /* Div de Status do Download */
-        #status-download {
-            margin-top: 15px;
             padding: 15px;
-            border-radius: 12px;
-            background: rgba(46, 204, 113, 0.1);
-            border: 1px dashed var(--success);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .download-item span { font-size: 0.8rem; color: var(--text-dim); }
+
+        .btn-dl {
+            padding: 8px 18px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-dl:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+        #status-download {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 242, 234, 0.05);
+            border: 1px dashed var(--primary);
+            border-radius: 10px;
             text-align: center;
-            display: none; /* Começa escondida */
+            font-size: 0.85rem;
+            display: none;
         }
 
-        /* Footer */
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            font-size: 0.9rem;
-            color: #888;
-        }
-
-        .social-links { margin-top: 10px; }
-        .social-links a {
-            color: #888;
-            font-size: 1.5rem;
-            margin: 0 10px;
-            transition: 0.3s;
-            text-decoration: none;
-        }
-        .social-links a:hover { color: var(--secondary); }
-
+        footer { margin-top: 50px; text-align: center; color: #444; }
+        .social a { color: #444; margin: 0 10px; font-size: 1.2rem; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>Tube<span>Save</span></h1>
-        <p style="color: #888;">Baixe vídeos em alta velocidade</p>
+        <h1>Media Downloader <span>Pro</span></h1>
+        <p>Araxá Tech • Universal Media Solution</p>
     </header>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('youtube', this)">
+            <i class="fab fa-youtube"></i> YouTube
+        </div>
+        <div class="tab" onclick="switchTab('instagram', this)">
+            <i class="fab fa-instagram"></i> Instagram
+        </div>
+    </div>
     
     <div class="search-box">
-        <input type="text" id="inputID" placeholder="Cole o link aqui">
+        <input type="text" id="inputID" placeholder="Cole o link aqui...">
     </div>
 
     <div class="video-card" id="video_card">
-        <div class="thumb-container">
-            <img id="thumb_preview" src="" alt="Thumbnail">
-        </div>
+        <img id="thumb_preview" class="thumb-preview" src="">
         <div class="info">
             <h4 id="info_title"></h4>
-            <h4 id="info_author" style="color: var(--secondary);"></h4>
-            <p>Qualidade Garantida • Pro</p>
+            <p id="info_author" style="color: var(--primary); font-size: 0.8rem; margin-bottom: 15px;"></p>
             
-            <div class="download-options">
-                <div class="download-option">
-                    <div class="format-info">
-                        <strong>Vídeo MP4</strong>
-                        <span>1080p (Alta Qualidade)</span>
-                    </div>
-                    <button class="download-btn" onclick="prepararDownload('mp4', '1080')">Baixar</button>
+            <div id="yt-group" class="options-group active">
+                <div class="download-item">
+                    <div><strong>Video MP4</strong><br><span>Full HD 1080p</span></div>
+                    <button class="btn-dl" style="background: var(--primary); color: #000;" onclick="prepararDownload('mp4', '1080')">Download</button>
                 </div>
-
-                <div class="download-option">
-                    <div class="format-info">
-                        <strong>Vídeo MP4</strong>
-                        <span>720p (Padrão)</span>
-                    </div>
-                    <button class="download-btn" onclick="prepararDownload('mp4', '720')">Baixar</button>
+                <div class="download-item">
+                    <div><strong>Video MP4</strong><br><span>HD 720p</span></div>
+                    <button class="btn-dl" style="background: rgba(255,255,255,0.1); color: #fff;" onclick="prepararDownload('mp4', '720')">Download</button>
                 </div>
+                <div class="download-item">
+                    <div><strong>Audio MP3</strong><br><span>320kbps High Fidelity</span></div>
+                    <button class="btn-dl" style="background: #fff; color: #000;" onclick="prepararDownload('mp3', '320')">Download</button>
+                </div>
+            </div>
 
-                <div class="download-option">
-                    <div class="format-info" style="color: #00f2ea;">
-                        <strong>Áudio MP3</strong>
-                        <span>320kbps (HQ Áudio)</span>
-                    </div>
-                    <button class="download-btn" style="background: var(--secondary); color: #0f0c29;" onclick="prepararDownload('mp3', '320')">Baixar</button>
+            <div id="insta-group" class="options-group">
+                <div class="download-item">
+                    <div><strong>Video / Reels</strong><br><span>Original MP4</span></div>
+                    <button class="btn-dl" style="background: var(--insta); color: #fff;" onclick="prepararDownload('insta', 'mp4')">Download</button>
+                </div>
+                <div class="download-item">
+                    <div><strong>Post Image</strong><br><span>High Res JPG</span></div>
+                    <button class="btn-dl" style="background: var(--primary); color: #000;" onclick="prepararDownload('insta', 'jpg')">Download</button>
+                </div>
+                <div class="download-item">
+                    <div><strong>Audio</strong><br><span>Extract from Reels</span></div>
+                    <button class="btn-dl" style="background: #fff; color: #000;" onclick="prepararDownload('insta', 'mp3')">Download</button>
                 </div>
             </div>
 
             <div id="status-download">
-                <span style="color: var(--success); font-weight: 600;">
-                    <i class="fas fa-check-circle"></i> Download concluído com sucesso!
-                </span>
+                <i class="fas fa-check-circle"></i> Download concluído com sucesso!
             </div>
         </div>
     </div>
 </div>
 
 <footer>
-    <p>Feito pelo Daniel bb</p>
-    <div class="social-links">
-        <a href="https://github.com/nielskii" target="_blank"><i class="fab fa-github"></i></a>
-        <a href="https://www.instagram.com/nielzky/" target="_blank"><i class="fab fa-instagram"></i></a>
-        <a href="https://www.linkedin.com/in/daniel-borges-a20b29306/" target="_blank"><i class="fab fa-linkedin"></i></a>
+    <div class="social">
+        <a href="https://github.com/nielskii"><i class="fab fa-github"></i></a>
+        <a href="https://www.instagram.com/nielzky/"><i class="fab fa-instagram"></i></a>
     </div>
+    <p style="margin-top: 10px;">By Daniel</p>
 </footer>
 
 <script>
+    function switchTab(platform, el) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        
+        document.querySelectorAll('.options-group').forEach(g => g.classList.remove('active'));
+        document.getElementById(platform === 'youtube' ? 'yt-group' : 'insta-group').classList.add('active');
+    }
+
     let inputID = document.getElementById("inputID");
     
     inputID.addEventListener('input', function(){
@@ -227,43 +236,25 @@
         .then(data => {
             let card = document.getElementById("video_card");
             card.style.display = 'block'; 
-
-            let thumb_preview = document.getElementById("thumb_preview");
-            thumb_preview.src = data.url_imagem;
-
-            let info_title = document.getElementById('info_title');
-            info_title.innerHTML = data.title;
-
-            let info_author = document.getElementById("info_author");
-            info_author.innerHTML = data.author;
-            
-            // Dica: esconda o status se o usuário colocar um novo link
+            document.getElementById("thumb_preview").src = data.url_imagem;
+            document.getElementById('info_title').innerHTML = data.title;
+            document.getElementById("info_author").innerHTML = data.author;
             document.getElementById("status-download").style.display = 'none';
         })
         .catch(error => console.error("Erro: ", error));
     });
 
     function prepararDownload(formato, qualidade) {
-        console.log("Solicitando:", formato, qualidade);
-        
         fetch(`http://127.0.0.1:5000/download?formato=${formato}&qualidade=${qualidade}&url_video=` + inputID.value)
         .then(response => response.json())
         .then(data => {
             let status_download = document.getElementById("status-download")
             status_download.style.display = 'block'
-            let infoPasta = document.createElement("div");
-            infoPasta.style.marginTop = "10px";
-            infoPasta.style.padding = "8px";
-            infoPasta.style.background = "rgba(0,0,0,0.2)";
-            infoPasta.style.borderRadius = "5px";
-
-            infoPasta.innerHTML = `
-                <p style="font-size: 0.8rem; color: #888;">Salvo em: <span style="color: var(--secondary);">C:/Videos</span></p>
-                <p style="font-size: 0.85rem; color: #fff; margin-top: 4px;">Arquivo: <strong>${data.name_file}</strong></p>
-            `;
-            
-            status_download.appendChild(infoPasta);
-            })
+            let info = document.createElement("p");
+            info.style.fontSize = "0.7rem";
+            info.innerHTML = `Salvo: ${data.name_file}`;
+            status_download.appendChild(info);
+        })
         .catch(error => console.error("Erro: ", error));
     }
 </script>

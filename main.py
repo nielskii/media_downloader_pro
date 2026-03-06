@@ -1,14 +1,12 @@
-from flask import Flask, request, render_template, jsonify, send_from_directory
+from flask import Flask, request, render_template, jsonify, send_file # Adicionado send_file
 from pytubefix import YouTube
 from pytubefix.cli import on_progress
 import re
 import os
-import ffmpeg
-
+import tempfile
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
-download_folder = 'downloads'
 
 @app.route('/', methods=["GET", "POST"])
 def index():
@@ -28,75 +26,30 @@ def get_info():
 #Cria uma rota que utiliza a função de baixar os videos
 @app.route("/download", methods=['GET', 'POST'])
 def download():
-    pasta_destino = "C:/videos"
+    # Usa a pasta temporária do sistema (funciona em Windows e Vercel)
+    pasta_destino = tempfile.gettempdir() 
+    
     url = request.args.get('url_video')
     formato = request.args.get('formato')
     qualidade = request.args.get('qualidade')
 
-    if (formato == 'mp4' and qualidade == "1080"):
-        yt = YouTube(url, on_progress_callback=on_progress, allow_oauth_cache=True, use_oauth=True)
-        filename = yt.title
-        filename_limpo = re.sub(r'[^a-zA-Z0-9\s]', "", filename)
-        
-        if not os.path.exists(pasta_destino):
-            os.makedirs(pasta_destino)
+    yt = YouTube(url, on_progress_callback=on_progress, allow_oauth_cache=True, use_oauth=True)
+    filename = yt.title
+    filename_limpo = re.sub(r'[^a-zA-Z0-9\s]', "", filename)
 
-        # Define os caminhos
-        video_temp = os.path.join(pasta_destino, f'{filename_limpo}_video.mp4')
-        audio_temp = os.path.join(pasta_destino, f'{filename_limpo}.mp3')
+    if (formato == 'mp4' and qualidade == "720"):
         file_final = os.path.join(pasta_destino, f'{filename_limpo}.mp4')
-
-        # Download das streams
-        yt.streams.filter(res="1080p").first().download(output_path=pasta_destino, filename=f'{filename_limpo}_video.mp4')
-        yt.streams.get_audio_only().download(output_path=pasta_destino, filename=f'{filename_limpo}.mp3')
-
-        #Junta o video com o audio
-        video_stream = ffmpeg.input(video_temp)
-        audio_stream = ffmpeg.input(audio_temp)
-        ffmpeg.output(video_stream, audio_stream, file_final, vcodec='copy', acodec='aac').run(overwrite_output=True)
-
-        os.remove(video_temp)
-        os.remove(audio_temp)
-
-        return jsonify({
-            'qualidade': f'{qualidade}p',
-            'download_directory': f'Salvo no diretório : {pasta_destino}',
-            'name_file': f'{filename_limpo}.mp4'
-        })
-
-    elif (formato == 'mp4' and qualidade == "720"):
-        yt = YouTube(url, on_progress_callback=on_progress, allow_oauth_cache=True, use_oauth=True)
-        filename = yt.title
-        filename_limpo = re.sub(r'[^a-zA-Z0-9\s]', "", filename)
         ys = yt.streams.get_highest_resolution()
-        if not os.path.exists(pasta_destino):
-            os.makedirs(pasta_destino)
-            print("Criando pasta destino para armazenar os videos.")
-        else:
-            pass
         ys.download(output_path=pasta_destino, filename=f'{filename_limpo}.mp4')
-        return jsonify({
-            'qualidade': f'{qualidade}p',
-            'download_directory': f'Salvo no diretório : {pasta_destino}',
-            'name_file': f'{filename_limpo}.mp4'
-        })
+        
+        return send_file(file_final, as_attachment=True)
 
     else:
-        yt = YouTube(url, on_progress_callback=on_progress, allow_oauth_cache=True, use_oauth=True)
-        filename = yt.title
-        filename_limpo = re.sub(r'[^a-zA-Z0-9\s]', "", filename)
+        file_final = os.path.join(pasta_destino, f'{filename_limpo}.mp3')
         ys = yt.streams.get_audio_only()
-        if not os.path.exists(pasta_destino):
-            os.makedirs(pasta_destino)
-            print("Criando pasta destino para armazenar os videos.")
-        else:
-            pass
         ys.download(output_path=pasta_destino, filename=f'{filename_limpo}.mp3')
-        return jsonify({
-            'qualidade': f'{qualidade}mp3',
-            'download_directory': f'Salvo no diretório : {pasta_destino}',
-            'name_file': f'{filename_limpo}.mp3'
-        })
+        
+        return send_file(file_final, as_attachment=True)
 
 if __name__ == "__main__":
     app.run(debug=True)
