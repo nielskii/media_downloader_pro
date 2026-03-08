@@ -252,8 +252,9 @@
             status_download.style.display = 'block'
             let info = document.createElement("p");
             info.style.fontSize = "0.7rem";
-            info.innerHTML = `Salvo: ${data.name_file}`;
+            info.innerHTML = `Salvo: ${data.mensagem}`;
             status_download.appendChild(info);
+
         })
         .catch(error => console.error("Erro: ", error));
     }
